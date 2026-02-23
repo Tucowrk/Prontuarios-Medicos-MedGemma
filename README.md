@@ -17,4 +17,4 @@ O MedGemma Assistente I.A Clínico é um sistema focado em modernizar o registro
 
 - **Back-end:** Python
 - **Inteligência Artificial:** MedGemma (Open-source), Modelos de Machine/Deep Learning
-- **Front-end:** HTML, CSS, JavaScript *(Atualize com o framework específico que vocês usaram, se houver)*
+- **Front-end:** HTML, CSS, JavaScript
