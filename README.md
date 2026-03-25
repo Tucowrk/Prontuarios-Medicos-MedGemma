@@ -36,6 +36,7 @@ Logo, este projeto visa atuar como um ecossistema de auxílio médico, conectand
   <img src="https://skillicons.dev/icons?i=ts" title="TypeScript" alt="TypeScript" />
   <img src="https://skillicons.dev/icons?i=tailwind" title="Tailwind CSS" alt="Tailwind" />
   <img src="https://skillicons.dev/icons?i=python" title="Python" alt="Python" />
+  <img src="https://skillicons.dev/icons?i=fastapi" title="FastAPI" alt="FastAPI" />
   <img src="https://skillicons.dev/icons?i=git" title="Git" alt="Git" />
   <img src="https://skillicons.dev/icons?i=vscode" title="VS Code" alt="VS Code" />
 </div>
