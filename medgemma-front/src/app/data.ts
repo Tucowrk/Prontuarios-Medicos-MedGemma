@@ -7,7 +7,6 @@ export type PatientProfile = {
   history: string;
 };
 
-// 2. Os Dados Iniciais (O terreno real)
 export const initialPatient: PatientProfile = {
   name: "João Silva",
   age: "45",
@@ -17,7 +16,6 @@ export const initialPatient: PatientProfile = {
   history: "Paciente hipertenso, relata desconforto retroesternal há 2 horas.",
 };
 
-// 3. Metadados do Sistema (Opcional, mas ajuda a limpar o page.tsx)
 export const systemMetadata = {
   title: "MedGemma",
   version: "1.5-PRO",
