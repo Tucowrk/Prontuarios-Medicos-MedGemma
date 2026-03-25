@@ -1,9 +1,11 @@
 export interface Paciente {
   id: string;
-  nome: string;
+  nomeCompleto: string;
   cpf: string;
   dataNascimento: string;
   sexo: 'Masculino' | 'Feminino' | 'Outro';
+  sexoDescricao?: string; // O "?" indica que só será preenchido se a opção for 'Outro'
+  endereco: string;
 }
 
 export interface Diagnostico {
