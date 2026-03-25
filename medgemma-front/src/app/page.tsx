@@ -7,7 +7,7 @@ export default function Home() {
       
       <header className="flex justify-between items-center text-white text-sm font-semibold px-2 mb-4 tracking-wider">
         <div className="flex gap-4">
-          <span>DATE {dataAtual}</span>
+          <span>DATA {dataAtual}</span>
           <span>{horaAtual}</span>
         </div>
         <span>COMPANY NAME</span>
