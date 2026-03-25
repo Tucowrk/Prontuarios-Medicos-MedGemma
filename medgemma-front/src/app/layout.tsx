@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-// Trazendo a fonte com três espessuras diferentes
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["300", "400", "600"], // 300 = Light, 400 = Normal, 600 = SemiBold
+  weight: ["300", "400", "600"], 
   variable: "--font-plus-jakarta",
 });
 
