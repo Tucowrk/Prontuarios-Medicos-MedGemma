@@ -1,32 +1,36 @@
 # 🩺 MedGemma · Clinical AI Assistant
 
+![Project Status 🚀](https://img.shields.io/badge/Status-In_Development-yellow)
 
-![Status do projeto 🚀](https://img.shields.io/badge/Status-Em_Desenvolvimento-yellow)
+## 💻 About the Project
+Image-assisted clinical diagnosis faces challenges of accuracy and agility in high-demand hospital environments. This project, MedGemma, applies software engineering and artificial intelligence to generate cutting-edge diagnostic support. The platform integrates a minimalist interface with an infrastructure capable of processing clinical data and medical images in real time.
 
-## 💻 Sobre o Projeto
-O diagnóstico clínico assistido por imagem enfrenta desafios de precisão e agilidade em ambientes hospitalares de alta demanda. Este projeto, o MedGemma, aplica engenharia de software e inteligência artificial para gerar suporte diagnóstico de ponta. A plataforma integra uma interface minimalista com uma infraestrutura capaz de processar dados clínicos e imagens médicas em tempo real.
-
-Logo, este projeto visa atuar como um ecossistema de auxílio médico, conectando o histórico do paciente a análises neurais profundas, oferecendo uma segunda opinião qualificada para profissionais de saúde.
-
----
-
-## ⚙️ Funcionalidades Desenvolvidas:
-
-### 🖥️ Front-end (Experiência do Médico)
-* **Design Minimalista e Glassmorphism:** Interface limpa focada em reduzir a fadiga cognitiva do profissional (Next.js, Tailwind CSS).
-* **Transições Cinematográficas:** Navegação suave entre a landing page e o painel de análise para uma experiência fluida.
-* **Gestão de Contexto do Paciente:** Sidebar dinâmica para entrada de metadados (Nome, Idade, CID, Queixa e Histórico Clínico).
-* **Chat Multimodal:** Painel interativo para operações de CRUD (Visualização, Cadastro e Exclusão de itens do catálogo).
-* **Preview de Exames:** Sistema de miniatura e remoção de arquivos antes do processamento pela IA.
-
-### 🧠 Back-end & Inteligência (Processamento)
-* **Integração de Metadados:** O sistema vincula automaticamente o histórico da sidebar ao prompt enviado para a IA.
-* **Processamento de Imagem:** Preparação de arquivos (X-ray, Tomografia, RM) para análise de visão computacional.
-* **Simulação Neural:** Lógica de resposta assíncrona que mimetiza o tempo de processamento de modelos de linguagem (LLMs).
+Therefore, this project aims to act as a medical assistance ecosystem, connecting the patient's history to deep neural analyses, offering a qualified second opinion for healthcare professionals.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## ⚙️ Developed Features
+
+### 🖥️ Front-end (Physician Experience)
+* **Minimalist Design and Glassmorphism:** Clean interface focused on reducing the professional's cognitive fatigue (Next.js, Tailwind CSS).
+* **Cinematic Transitions:** Smooth navigation between the landing page and the analysis dashboard for a fluid experience.
+* **Patient Context Management:** Dynamic sidebar for metadata input (Name, Age, ICD, Complaint, and Clinical History).
+* **Multimodal Chat:** Interactive panel for simultaneous submission of imaging exams and text, communicating directly with the API.
+* **Exam Preview:** Thumbnail and file removal system prior to processing.
+
+### 🏢 Back-end (Orchestration and Persistence)
+* **Corporate RESTful Architecture:** API developed in Java with Spring Boot to manage the hospital's data traffic.
+* **Data Persistence:** Integration with MySQL via Spring Data JPA/Hibernate, ensuring the secure storage of all clinical history and structured metadata (`PatientCase`).
+* **MVC and DTO Design Patterns:** Clean and scalable structuring, separating responsibilities among Controllers, Services, and Repositories.
+* **Microservices Orchestration:** Endpoint configured to receive images (`MultipartFile`) and structured data, acting as the "manager" that will bridge the gap with the AI model.
+
+### 🧠 Artificial Intelligence
+* **Metadata Integration:** The system will automatically send the structured history to the AI microservice.
+* **Computer Vision and LLMs:** Preparation of the Python/FastAPI architecture to receive requests from Java and process images and reports through the MedGemma model.
+
+---
+
+## 🛠️ Technologies Used
 
 <br>
 
