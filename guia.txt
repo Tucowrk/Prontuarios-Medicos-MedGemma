@@ -1,0 +1,13 @@
+Backend Python:
+
+- No terminal navegue até a pasta: cd medgemma-ai/app
+- Configure a chave: $env:HF_TOKEN="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"
+- Ligue o servidor: python backend.py
+
+
+Frontend Next.js:
+
+- No terminal navegue até a pasta: cd medgemma-front
+- Caso precise instale as dependências: npm install
+- Ligue o site: npm run dev
+- Acesse: http://localhost:3000

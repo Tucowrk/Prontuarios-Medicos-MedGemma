@@ -1,39 +1,41 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import * as React from "react";
 import { systemMetadata, initialPatient } from "./data";
 
 export default function Home() {
-  const [isStarted, setIsStarted] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [isTyping, setIsTyping] = useState(false); // Novo: Estado de digitação
-  const [zoomedImage, setZoomedImage] = useState<string | null>(null); // Novo: Zoom da imagem
+  const [isStarted, setIsStarted] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
+  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+  const [isTyping, setIsTyping] = React.useState(false); 
+  const [zoomedImage, setZoomedImage] = React.useState<string | null>(null); 
   
-  const [patient, setPatient] = useState(initialPatient);
-  const [message, setMessage] = useState("");
-  const [selectedImages, setSelectedImages] = useState<{file: File, preview: string}[]>([]);
-  const [chatLog, setChatLog] = useState<{role: 'user' | 'ai', text: string, images?: string[]}[]>([]);
+  const [patient, setPatient] = React.useState(initialPatient);
+  const [message, setMessage] = React.useState("");
+  const [selectedImages, setSelectedImages] = React.useState<{file: File, preview: string}[]>([]);
+  const [chatLog, setChatLog] = React.useState<{role: 'user' | 'ai', text: string, images?: string[]}[]>([]);
   
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null); // Novo: Referência para scroll
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
-  // Função para scroll automático
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     scrollToBottom();
-  }, [chatLog, isTyping]); // Rola sempre que o chat ou o "digitando" mudar
+  }, [chatLog, isTyping]);
 
   if (!mounted) return null;
 
-  const isSidebarComplete = Object.values(patient).every(value => value.trim() !== "");
+  // Correção: Garante que o valor seja tratado como string antes do .trim()
+  const isSidebarComplete = Object.values(patient).every(value => 
+    value !== null && value !== undefined && String(value).trim() !== ""
+  );
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -45,26 +47,56 @@ export default function Home() {
     }
   };
 
-  const handleSendMessage = () => {
+  // Alteração: Função agora é Assíncrona para falar com o Backend
+  const handleSendMessage = async () => {
     if (!message.trim() && selectedImages.length === 0) return;
     
-    const imageUrls = selectedImages.map(img => img.preview);
-    const newLogs = [...chatLog, { role: 'user' as const, text: message, images: imageUrls }];
+    const currentMessage = message;
+    const currentImages = [...selectedImages];
+    const imageUrls = currentImages.map(img => img.preview);
     
-    setChatLog(newLogs);
+    // 1. Atualiza o chat localmente com a pergunta do usuário
+    setChatLog(prev => [...prev, { role: 'user', text: currentMessage, images: imageUrls }]);
     setMessage("");
     setSelectedImages([]);
-    setIsTyping(true); // Inicia o "pensando..."
+    setIsTyping(true);
 
-    setTimeout(() => {
-      setIsTyping(false);
+    try {
+      // 2. Prepara o FormData (necessário para enviar arquivos)
+      const formData = new FormData();
+      formData.append('patient_data', JSON.stringify(patient));
+      formData.append('message', currentMessage);
+      
+      if (currentImages.length > 0) {
+        // Envia a primeira imagem selecionada
+        formData.append('files', currentImages[0].file);
+      }
+
+      // 3. Chamada real para o seu Microserviço Python
+      const response = await fetch('http://localhost:8000/analyze', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Erro na resposta do servidor");
+
+      const data = await response.json();
+
+      // 4. Exibe a resposta real da IA (MedGemma)
       setChatLog(prev => [...prev, { 
-        role: 'ai' as const, 
-        text: imageUrls.length > 0 
-          ? "Imagens processadas com sucesso. Identifico uma opacidade reticular no lobo inferior direito. Recomendo correlação com ausculta pulmonar." 
-          : "Analisando histórico clínico... Os sintomas descritos sugerem monitoramento cardiovascular contínuo." 
+        role: 'ai', 
+        text: data.analysis || "Análise concluída, mas sem texto de retorno." 
       }]);
-    }, 2000); // 2 segundos para dar realismo
+
+    } catch (error) {
+      console.error("Erro ao conectar com a IA:", error);
+      setChatLog(prev => [...prev, { 
+        role: 'ai', 
+        text: "Houve um erro na comunicação com o servidor MedGemma. Verifique se o backend Python está rodando." 
+      }]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const dataAtual = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase();
@@ -73,7 +105,6 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#1A3644] p-4 flex flex-col font-sans selection:bg-[#35596C]/20 overflow-hidden">
       
-      {/* LIGHTBOX OVERLAY (Zoom da Imagem) */}
       {zoomedImage && (
         <div 
           className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-10 cursor-zoom-out animate-in fade-in duration-300"
@@ -94,7 +125,6 @@ export default function Home() {
           <div className="bubble"></div><div className="bubble"></div><div className="bubble"></div>
         </div>
 
-        {/* TELA 1: LANDING */}
         <div className={`absolute inset-0 z-10 flex flex-col justify-center pl-[10%] md:pl-[12%] transition-all duration-1000 ease-in-out ${isStarted ? "opacity-0 pointer-events-none scale-95 blur-xl" : "opacity-100"}`}>
             <h1 className="text-[#35596C] flex flex-col leading-[0.85] font-[family-name:var(--font-plus-jakarta)]">
               <span className="text-6xl md:text-[150px] font-semibold tracking-tighter">{systemMetadata.title}:</span>
@@ -106,10 +136,8 @@ export default function Home() {
             </button>
         </div>
 
-        {/* TELA 2: DASHBOARD */}
         <div className={`absolute inset-0 z-20 flex w-full h-full bg-white/30 backdrop-blur-2xl transition-all duration-1000 delay-100 ease-out ${isStarted ? "opacity-100 translate-y-0" : "opacity-0 pointer-events-none translate-y-12"}`}>
           
-          {/* SIDEBAR */}
           <aside className="w-[340px] bg-white/60 border-r border-slate-200/50 flex flex-col shadow-xl flex-shrink-0">
             <div className="p-8 border-b border-slate-100/50 flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#35596C] flex items-center justify-center text-white shadow-lg"><svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
@@ -145,7 +173,6 @@ export default function Home() {
             </div>
           </aside>
 
-          {/* ÁREA DO CHAT */}
           <main className="flex-1 flex flex-col min-w-0">
             <div className="h-[80px] flex justify-end items-center px-10">
               <button onClick={() => {setIsStarted(false); setIsAnalyzing(false); setChatLog([]);}} className="text-[10px] font-black text-slate-300 hover:text-[#35596C] transition-all tracking-[0.2em] uppercase">Encerrar Sessão</button>
@@ -165,7 +192,7 @@ export default function Home() {
                         {msg.images?.map((url, i) => (
                           <img key={i} src={url} onClick={() => setZoomedImage(url)} className="h-32 rounded-lg mb-3 cursor-zoom-in hover:brightness-90 transition-all" alt="Exame" />
                         ))}
-                        <p className="leading-relaxed">{msg.text}</p>
+                        <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                       </div>
                     </div>
                   ))}
@@ -187,7 +214,6 @@ export default function Home() {
               )}
             </div>
 
-            {/* INPUT AREA */}
             <div className="p-10 pt-0">
               <div className="max-w-4xl mx-auto space-y-4">
                 {selectedImages.length > 0 && (
@@ -204,7 +230,7 @@ export default function Home() {
                   <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*" onChange={handleFileSelect} />
                   <button onClick={() => fileInputRef.current?.click()} className="p-3 text-slate-300 hover:text-[#35596C] transition-colors"><svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg></button>
                   <input type="text" value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()} placeholder="Descreva os achados clínicos..." className="flex-1 bg-transparent outline-none text-sm text-slate-600 placeholder:text-slate-300 font-medium" />
-                  <button onClick={handleSendMessage} className="bg-[#35596C] text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M22 2 11 13M22 2 15 22 11 13 2 9l20-7z"/></svg></button>
+                  <button onClick={handleSendMessage} disabled={isTyping} className={`${isTyping ? "bg-slate-300" : "bg-[#35596C] hover:scale-105"} text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-lg`}><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M22 2 11 13M22 2 15 22 11 13 2 9l20-7z"/></svg></button>
                 </div>
               </div>
             </div>
