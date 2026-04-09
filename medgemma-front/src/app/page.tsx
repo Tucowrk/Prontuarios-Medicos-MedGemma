@@ -100,10 +100,28 @@ export default function Home() {
 
       const data = await response.json();
 
+      const cleanMedicalResponse = (text: string) => {
+        if (!text) return "Não foi possível obter a análise.";
+
+        const findingsIndex = text.indexOf("FINDINGS:");
+
+        if (findingsIndex !== -1) {
+          return text.substring(findingsIndex).trim();
+        }
+
+        const modelIndex = text.lastIndexOf("model");
+
+        if (modelIndex !== -1) {
+          return text.substring(modelIndex + 5).trim();
+        }
+
+        return text;
+      };
+
       // Exibe a resposta real da IA (MedGemma)
       setChatLog(prev => [...prev, { 
         role: 'ai', 
-        text: data.analysis || "Análise concluída, mas sem texto de retorno." 
+        text: cleanMedicalResponse(data.analysis || "Análise concluída, mas sem texto de retorno.") 
       }]);
 
     } catch (error) {
