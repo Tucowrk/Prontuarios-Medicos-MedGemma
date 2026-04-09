@@ -72,10 +72,14 @@ async def analyze_case(
         
         if ACTIVE_AI_PROVIDER == "CLOUD_GEMINI":
             # CHAMADA PARA O GOOGLE CLOUD
-            model = genai.GenerativeModel('gemini-1.5-flash-latest')
+            model = genai.GenerativeModel('gemini-1.5-flash')
+
             with Image.open(temp_path) as img:
                 img.load()
-                response = model.generate_content([custom_prompt, img])
+                response = model.generate_content(
+                    [custom_prompt, img],
+                    generation_config={"temperature": 0.4}
+                )
                 response_text = response.text
         else:
             # CHAMADA PARA A GPU LOCAL
