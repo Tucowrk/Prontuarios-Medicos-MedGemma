@@ -70,13 +70,13 @@ async def analyze_case(
     try:
         custom_prompt = f"Patient context: {patient_data}\nPhysician's Notes: {message}\nTask: Analyze the attached medical image."
         
-        # --- DECISÃO DE QUAL IA USAR ---
         if ACTIVE_AI_PROVIDER == "CLOUD_GEMINI":
             # CHAMADA PARA O GOOGLE CLOUD
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            img = Image.open(temp_path)
-            response = model.generate_content([custom_prompt, img])
-            response_text = response.text
+            model = genai.GenerativeModel('gemini-1.5-flash-latest')
+            with Image.open(temp_path) as img:
+                img.load()
+                response = model.generate_content([custom_prompt, img])
+                response_text = response.text
         else:
             # CHAMADA PARA A GPU LOCAL
             response_text = ai_model.analyze_image(
@@ -90,7 +90,9 @@ async def analyze_case(
         return {"analysis": response_text}
 
     except Exception as e:
-        print(f"❌ Erro: {str(e)}")
+        print(f"❌ Erro detalhado: {str(e)}")
+        if "404" in str(e):
+            return {"analysis": "Erro: O modelo Gemini 1.5 Flash não foi encontrado. Verifique sua chave de API e região."}
         return {"analysis": f"Erro no processamento: {str(e)}"}
     finally:
         if os.path.exists(temp_path):
