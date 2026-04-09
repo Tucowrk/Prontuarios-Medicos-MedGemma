@@ -3,8 +3,7 @@ MedGemma Backend API - FastAPI Server
 Conecta o frontend/Java ao modelo MedGemma 1.5 Local
 
 Uso:
-pip install fastapi uvicorn python-multipart
-python backend.py
+Acessar o arquivo guia.txt 
 
 O servidor ficará disponível em http://localhost:8000
 """
@@ -16,6 +15,9 @@ import uvicorn
 import os
 import shutil
 from model import MedGemmaModel
+import google.generativeai as genai
+ACTIVE_AI_PROVIDER = "CLOUD_GEMINI"
+GOOGLE_API_KEY = "SUA_CHAVE_AQUI_DENTRO_DAS_ASPAS"
 
 app = FastAPI(title="MedGemma Local AI Microservice")
 
