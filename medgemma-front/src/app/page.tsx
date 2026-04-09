@@ -46,6 +46,21 @@ export default function Home() {
     }
   };
 
+  // Função auxiliar para limpar a resposta médica
+  const cleanMedicalResponse = (text: string) => {
+    if (!text) return "Não foi possível obter a análise.";
+
+    // Prioridade 1: Tenta achar o padrão de saída do MedGemma Local
+    const findingsIndex = text.indexOf("FINDINGS:");
+    if (findingsIndex !== -1) return text.substring(findingsIndex).trim();
+
+    // Prioridade 2: Tenta limpar se vier com o lixo do prompt (palavra 'model')
+    const modelIndex = text.lastIndexOf("model");
+    if (modelIndex !== -1) return text.substring(modelIndex + 5).trim();
+
+    return text;
+  };
+
   const handleSendMessage = async () => {
     if (!message.trim() && selectedImages.length === 0) return;
     
@@ -53,35 +68,15 @@ export default function Home() {
     const currentImages = [...selectedImages];
     const imageUrls = currentImages.map(img => img.preview);
     
-    const rawText = data.analysis || "";
-    const cleanMedicalResponse = (text: string) => {
-      if (!text) return "Não foi possível obter a análise.";
+    // Adiciona a mensagem do usuário no chat imediatamente
+    setChatLog(prev => [...prev, { role: 'user', text: currentMessage, images: imageUrls }]);
+    
+    // Limpa os campos de entrada
+    setMessage("");
+    setSelectedImages([]);
+    setIsTyping(true);
 
-      const findingsIndex = text.indexOf("FINDINGS:");
-
-      if (findingsIndex !== -1) {
-        return text.substring(findingsIndex).trim();
-    }
-
-    const modelIndex = text.lastIndexOf("model");
-
-    if (modelIndex !== -1) {
-      return text.substring(modelIndex + 5).trim();
-    }
-
-    return text;
-  };
-
-  setChatLog(prev => [...prev, { 
-    role: 'ai', 
-    text: cleanMedicalResponse(rawText) 
-  }]);
-
-      setMessage("");
-      setSelectedImages([]);
-      setIsTyping(true);
-
-    try { // Prepara o FormData
+    try {
       const formData = new FormData();
       formData.append('patient_data', JSON.stringify(patient));
       formData.append('message', currentMessage);
@@ -90,7 +85,7 @@ export default function Home() {
         formData.append('files', currentImages[0].file);
       }
 
-      // Chamada real para o Microserviço Python
+      // Chamada para o Backend Python
       const response = await fetch('http://localhost:8000/analyze', {
         method: 'POST',
         body: formData,
@@ -100,40 +95,26 @@ export default function Home() {
 
       const data = await response.json();
 
-      const cleanMedicalResponse = (text: string) => {
-        if (!text) return "Não foi possível obter a análise.";
-
-        const findingsIndex = text.indexOf("FINDINGS:");
-
-        if (findingsIndex !== -1) {
-          return text.substring(findingsIndex).trim();
-        }
-
-        const modelIndex = text.lastIndexOf("model");
-
-        if (modelIndex !== -1) {
-          return text.substring(modelIndex + 5).trim();
-        }
-
-        return text;
-      };
-
-      // Exibe a resposta real da IA (MedGemma)
+      // Exibe a resposta limpa da IA
       setChatLog(prev => [...prev, { 
         role: 'ai', 
-        text: cleanMedicalResponse(data.analysis || "Análise concluída, mas sem texto de retorno.") 
+        text: cleanMedicalResponse(data.analysis || "") 
       }]);
 
     } catch (error) {
       console.error("Erro ao conectar com a IA:", error);
       setChatLog(prev => [...prev, { 
         role: 'ai', 
-        text: "Houve um erro na comunicação com o servidor MedGemma. Verifique se o backend Python está rodando." 
+        text: "Houve um erro na comunicação com o servidor. Verifique se o backend Python está rodando na porta 8000." 
       }]);
     } finally {
       setIsTyping(false);
     }
   };
+
+
+
+  // Tailwind
 
   const dataAtual = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase();
   const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
